@@ -2,16 +2,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { buildCoronaryTree, buildHeartGeometry, buildVesselTrunks } from "./geometry";
-
-const JET = /* glsl */ `
-vec3 jet(float t){
-  t = clamp(t, 0.0, 1.0);
-  float r = clamp(1.5 - abs(4.0 * t - 3.0), 0.0, 1.0);
-  float g = clamp(1.5 - abs(4.0 * t - 2.0), 0.0, 1.0);
-  float b = clamp(1.5 - abs(4.0 * t - 1.0), 0.0, 1.0);
-  return vec3(r, g, b);
-}
-`;
+import type { StateKey } from "@/lib/twin-data";
 
 const vertexShader = /* glsl */ `
 attribute float aField;
@@ -44,17 +35,47 @@ void main(){
 
 const fragmentShader = /* glsl */ `
 precision highp float;
-${JET}
 uniform float uOpacity;
 uniform float uTime;
 varying float vField;
 varying vec3 vNormalW;
 varying vec3 vViewDir;
 varying vec3 vPos;
+uniform float uState;
+
+vec3 stateColor(float state, float lvMask, float rvMask, float atriaMask){
+  vec3 neutral = vec3(0.886, 0.910, 0.941); // #e2e8f0
+  vec3 warningLv = vec3(0.929, 0.537, 0.212); // #ed8936
+  vec3 criticalLv = vec3(0.773, 0.188, 0.188); // #c53030
+  vec3 criticalRv = vec3(0.929, 0.537, 0.212); // #ed8936
+  vec3 criticalAtria = vec3(0.867, 0.420, 0.125); // #dd6b20
+
+  if(state < 0.5){
+    return neutral;
+  }
+
+  if(state < 1.5){
+    return mix(neutral, warningLv, lvMask);
+  }
+
+  vec3 crit = neutral;
+  crit = mix(crit, criticalAtria, atriaMask);
+  crit = mix(crit, criticalRv, rvMask);
+  crit = mix(crit, criticalLv, lvMask);
+  return crit;
+}
 
 void main(){
   vec3 n = normalize(vNormalW);
-  vec3 base = jet(vField);
+  float atriaMask = smoothstep(0.30, 0.75, vPos.y);
+  float rvMask = (1.0 - atriaMask) * (1.0 - smoothstep(-0.35, 0.12, vPos.x));
+  float lvMask = (1.0 - atriaMask) * (1.0 - rvMask);
+  float sumMasks = max(lvMask + rvMask + atriaMask, 0.0001);
+  lvMask /= sumMasks;
+  rvMask /= sumMasks;
+  atriaMask /= sumMasks;
+
+  vec3 base = stateColor(uState, lvMask, rvMask, atriaMask);
   vec3 l1 = normalize(vec3(0.6, 0.8, 0.9));
   vec3 l2 = normalize(vec3(-0.7, 0.2, -0.5));
   float diff = max(dot(n, l1), 0.0) * 0.75 + max(dot(n, l2), 0.0) * 0.25;
@@ -72,12 +93,19 @@ interface Props {
   severity: number;
   lesion: [number, number, number];
   bpm: number;
+  stateKey: StateKey;
   mode: "perfusion" | "vessels" | "xray";
   autoRotate: boolean;
   onBeat?: () => void;
 }
 
-export function HeartModel({ severity, lesion, bpm, mode, onBeat }: Props) {
+const STATE_TO_INDEX: Record<StateKey, number> = {
+  healthy: 0,
+  warning: 1,
+  critical: 2,
+};
+
+export function HeartModel({ severity, lesion, bpm, stateKey, mode, onBeat }: Props) {
   const group = useRef<THREE.Group>(null);
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const { invalidate } = useThree();
@@ -92,6 +120,7 @@ export function HeartModel({ severity, lesion, bpm, mode, onBeat }: Props) {
       uBeat: { value: 0 },
       uSeverity: { value: severity },
       uLesion: { value: new THREE.Vector3(...lesion) },
+      uState: { value: STATE_TO_INDEX[stateKey] ?? 0 },
       uOpacity: { value: 0.92 },
     }),
     [],
@@ -123,6 +152,7 @@ export function HeartModel({ severity, lesion, bpm, mode, onBeat }: Props) {
       dt,
     );
     u.uLesion.value.lerp(new THREE.Vector3(...lesion), 1 - Math.exp(-3 * dt));
+    u.uState.value = STATE_TO_INDEX[stateKey] ?? 0;
     u.uOpacity.value = THREE.MathUtils.damp(
       u.uOpacity.value,
       mode === "xray" ? 0.34 : mode === "vessels" ? 0.16 : 0.92,

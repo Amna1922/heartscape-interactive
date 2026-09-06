@@ -50,6 +50,7 @@ export function HeartViewer({ severity, lesion, bpm, stateKey }: Props) {
             severity={severity}
             lesion={lesion}
             bpm={bpm}
+            stateKey={stateKey}
             mode={mode}
             autoRotate={autoRotate}
           />
@@ -89,15 +90,14 @@ export function HeartViewer({ severity, lesion, bpm, stateKey }: Props) {
         {autoRotate ? "Pause spin" : "Auto-rotate"}
       </button>
 
-      {/* colour scale */}
-      <div className="absolute bottom-3 left-3 flex items-center gap-2">
+      <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-lg border border-border/80 bg-card/85 px-2.5 py-1.5 backdrop-blur">
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-          Low
+          State map
         </span>
-        <div className="h-2 w-32 rounded-full bg-[linear-gradient(90deg,#0000ff,#00ffff,#00ff00,#ffff00,#ff0000)] sm:w-44" />
-        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-          High perfusion
-        </span>
+        <span
+          className="h-2 w-2 rounded-full"
+          style={{ backgroundColor: stateKey === "critical" ? "#c53030" : stateKey === "warning" ? "#ed8936" : "#e2e8f0" }}
+        />
       </div>
 
       <div className="pointer-events-none absolute bottom-3 right-3 text-right">

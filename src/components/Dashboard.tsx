@@ -68,7 +68,7 @@ function Metric({
   sub?: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </p>
@@ -89,12 +89,12 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
   return (
     <div className="min-h-screen bg-background">
       {/* header */}
-      <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-2.5">
             <HeartPulse className="h-5 w-5" style={{ color: tone.color }} />
             <div>
-              <p className="text-sm font-medium leading-tight text-foreground">
+              <p className="text-sm font-semibold leading-tight text-primary">
                 Cardiac Digital Twin
               </p>
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -164,7 +164,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
             <div className="h-[420px] sm:h-[520px]">
               <Suspense
                 fallback={
-                  <div className="flex h-full items-center justify-center rounded-xl border border-border bg-card font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <div className="flex h-full items-center justify-center rounded-xl border border-border bg-card font-mono text-[11px] uppercase tracking-wider text-muted-foreground shadow-sm">
                     Loading twin geometry…
                   </div>
                 }
@@ -179,7 +179,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
                 <div className="flex items-center justify-between">
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     Simulated ECG · lead II
@@ -191,7 +191,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
                 <Waveform data={s.waveform} color={tone.color} />
               </div>
 
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
                 <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                   Segmental perfusion (%)
                 </p>
@@ -234,7 +234,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 Risk & ejection fraction trajectory
               </p>
@@ -298,7 +298,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               <Metric label="SpO₂" value={s.spo2} unit="%" sub="≥ 95%" />
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -327,7 +327,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card">
+            <div className="rounded-xl border border-border bg-card shadow-sm">
               <div className="flex items-center justify-between border-b border-border px-5 py-3">
                 <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                   Laboratory panel
@@ -355,7 +355,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               </ul>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5">
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <div className="flex items-center gap-2">
                 <Stethoscope className="h-4 w-4" style={{ color: tone.color }} />
                 <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">

@@ -89,7 +89,7 @@ export function UploadStage({ onStart }: { onStart: (files: FileItem[]) => void 
                 const f = e.dataTransfer.files?.[0];
                 attach(kind, f?.name, f?.size);
               }}
-              className={`group relative flex flex-col rounded-xl border p-5 transition-colors ${
+              className={`group relative flex flex-col rounded-xl border p-5 shadow-sm transition-colors ${
                 file
                   ? "border-primary/60 bg-primary/5"
                   : dragOver === kind
