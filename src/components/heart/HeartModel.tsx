@@ -33,7 +33,7 @@ void main(){
   p -= normal * contract;
   p.y += contract * 0.35 * (1.0 - smoothstep(-1.2, 1.0, position.y));
 
-  vField = clamp(aField * (1.0 - 0.92 * lesion) - 0.06 * uSeverity, 0.0, 1.0);
+  vField = clamp(aField * (1.0 - 0.9 * uSeverity), 0.0, 1.0);
   vPos = p;
   vNormalW = normalize(normalMatrix * normal);
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
