@@ -33,7 +33,7 @@ void main(){
   p -= normal * contract;
   p.y += contract * 0.35 * (1.0 - smoothstep(-1.2, 1.0, position.y));
 
-  vField = clamp(aField * (1.0 - 0.9 * uSeverity), 0.0, 1.0);
+  vField = clamp(aField * (1.0 - 0.92 * lesion) - 0.06 * uSeverity, 0.0, 1.0);
   vPos = p;
   vNormalW = normalize(normalMatrix * normal);
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
@@ -79,6 +79,7 @@ interface Props {
 
 export function HeartModel({ severity, lesion, bpm, mode, onBeat }: Props) {
   const group = useRef<THREE.Group>(null);
+  const matRef = useRef<THREE.ShaderMaterial>(null);
   const { invalidate } = useThree();
 
   const geometry = useMemo(() => buildHeartGeometry(), []);
@@ -104,34 +105,30 @@ export function HeartModel({ severity, lesion, bpm, mode, onBeat }: Props) {
 
   const phase = useRef(0);
   const lastBeat = useRef(0);
-  const lastLog = useRef(0);
 
   useFrame((state, rawDelta) => {
     const dt = Math.min(rawDelta, 0.05);
+    const u = matRef.current?.uniforms ?? uniforms;
     phase.current = (phase.current + (dt * bpm) / 60) % 1;
     const t = phase.current;
     const beat =
       Math.exp(-Math.pow((t - 0.16) / 0.11, 2)) +
       0.35 * Math.exp(-Math.pow((t - 0.42) / 0.13, 2));
-    uniforms.uBeat.value = beat;
-    uniforms.uTime.value = state.clock.elapsedTime;
-    uniforms.uSeverity.value = THREE.MathUtils.damp(
-      uniforms.uSeverity.value,
+    u.uBeat.value = beat;
+    u.uTime.value = state.clock.elapsedTime;
+    u.uSeverity.value = THREE.MathUtils.damp(
+      u.uSeverity.value,
       severity,
       3,
       dt,
     );
-    uniforms.uLesion.value.lerp(new THREE.Vector3(...lesion), 1 - Math.exp(-3 * dt));
-    uniforms.uOpacity.value = THREE.MathUtils.damp(
-      uniforms.uOpacity.value,
+    u.uLesion.value.lerp(new THREE.Vector3(...lesion), 1 - Math.exp(-3 * dt));
+    u.uOpacity.value = THREE.MathUtils.damp(
+      u.uOpacity.value,
       mode === "xray" ? 0.34 : mode === "vessels" ? 0.16 : 0.92,
       4,
       dt,
     );
-    if (state.clock.elapsedTime - (lastLog.current || 0) > 2) {
-      lastLog.current = state.clock.elapsedTime;
-      console.log('PROBE sevProp', severity, 'uni', uniforms.uSeverity.value.toFixed(2), 'les', uniforms.uLesion.value.toArray().join(','));
-    }
     if (t < lastBeat.current) onBeat?.();
     lastBeat.current = t;
     invalidate();
@@ -153,6 +150,7 @@ export function HeartModel({ severity, lesion, bpm, mode, onBeat }: Props) {
     <group ref={group} rotation={[0.12, -0.35, 0.06]} position={[0, -0.25, 0]}>
       <mesh geometry={geometry}>
         <shaderMaterial
+          ref={matRef}
           vertexShader={vertexShader}
           fragmentShader={fragmentShader}
           uniforms={uniforms}
