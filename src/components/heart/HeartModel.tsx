@@ -108,7 +108,7 @@ export function HeartModel({ severity, lesion, bpm, mode, onBeat }: Props) {
 
   useFrame((state, rawDelta) => {
     const dt = Math.min(rawDelta, 0.05);
-    const u = matRef.current?.uniforms ?? uniforms;
+    const u = (matRef.current?.uniforms ?? uniforms) as typeof uniforms;
     phase.current = (phase.current + (dt * bpm) / 60) % 1;
     const t = phase.current;
     const beat =
