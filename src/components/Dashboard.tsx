@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import {
+  Activity,
   AlertTriangle,
   ArrowUpRight,
   Download,
