@@ -55,7 +55,7 @@ function wave(amp: number, jitter: number, notch: number) {
 export const TWIN_STATES: TwinState[] = [
   {
     key: "healthy",
-    timepoint: "T0 — Baseline",
+    timepoint: "0 Months — Baseline",
     dateLabel: "12 Mar · 09:14",
     headline: "Physiology within normal limits",
     status: "Stable",
@@ -99,7 +99,7 @@ export const TWIN_STATES: TwinState[] = [
   },
   {
     key: "warning",
-    timepoint: "T1 — 6-month follow-up",
+    timepoint: "6 Months Follow-up",
     dateLabel: "18 Sep · 10:02",
     headline: "Emerging inferolateral perfusion deficit",
     status: "Watch",
@@ -147,7 +147,7 @@ export const TWIN_STATES: TwinState[] = [
   },
   {
     key: "critical",
-    timepoint: "T2 — Acute presentation",
+    timepoint: "12 Months Follow-up",
     dateLabel: "04 Feb · 03:41",
     headline: "Transmural ischaemia with pump failure",
     status: "Critical",
@@ -206,12 +206,13 @@ export const RISK_TREND = [
 ];
 
 export const PIPELINE_STEPS = [
-  { label: "Ingesting DICOM series", detail: "412 slices · 0.6 mm isotropic" },
-  { label: "Segmenting chambers & myocardium", detail: "nnU-Net cardiac v4" },
-  { label: "Extracting coronary tree", detail: "centreline + lumen radius" },
-  { label: "Fusing echo strain & lab timeline", detail: "temporal registration" },
-  { label: "Solving electro-mechanical model", detail: "3 cardiac cycles · FEM" },
-  { label: "Rendering patient-specific twin", detail: "perfusion colour map" },
+  { label: "Processing MRI and lab values", detail: "" },
+  { label: "Segmenting chamber", detail: "" },
+  { label: "Extract 3D geometry", detail: "" },
+  { label: "Create mesh", detail: "" },
+  { label: "Apply clinical thresholds", detail: "" },
+  { label: "Fusing lab timeline", detail: "" },
+  { label: "Render in browser", detail: "" },
 ];
 
 export const formatLab = (l: Lab) => l.value.toFixed(l.precision ?? 0);

@@ -7,7 +7,6 @@ import type { StateKey } from "@/lib/twin-data";
 const MODES = [
   { key: "perfusion", label: "Perfusion" },
   { key: "xray", label: "Translucent" },
-  { key: "vessels", label: "Coronary tree" },
 ] as const;
 
 type Mode = (typeof MODES)[number]["key"];

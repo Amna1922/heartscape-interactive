@@ -1,7 +1,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { buildCoronaryTree, buildHeartGeometry, buildVesselTrunks } from "./geometry";
+import { buildHeartGeometry, buildVesselTrunks } from "./geometry";
 import type { StateKey } from "@/lib/twin-data";
 
 const vertexShader = /* glsl */ `
@@ -94,7 +94,7 @@ interface Props {
   lesion: [number, number, number];
   bpm: number;
   stateKey: StateKey;
-  mode: "perfusion" | "vessels" | "xray";
+  mode: "perfusion" | "xray";
   autoRotate: boolean;
   onBeat?: () => void;
 }
@@ -112,7 +112,6 @@ export function HeartModel({ severity, lesion, bpm, stateKey, mode, onBeat }: Pr
 
   const geometry = useMemo(() => buildHeartGeometry(), []);
   const trunks = useMemo(() => buildVesselTrunks(), []);
-  const coronaries = useMemo(() => buildCoronaryTree(), []);
 
   const uniforms = useMemo(
     () => ({
@@ -129,8 +128,7 @@ export function HeartModel({ severity, lesion, bpm, stateKey, mode, onBeat }: Pr
   useEffect(() => () => {
     geometry.dispose();
     trunks.forEach((t) => t.dispose());
-    coronaries.forEach((t) => t.dispose());
-  }, [geometry, trunks, coronaries]);
+  }, [geometry, trunks]);
 
   const phase = useRef(0);
   const lastBeat = useRef(0);
@@ -155,7 +153,7 @@ export function HeartModel({ severity, lesion, bpm, stateKey, mode, onBeat }: Pr
     u.uState.value = STATE_TO_INDEX[stateKey] ?? 0;
     u.uOpacity.value = THREE.MathUtils.damp(
       u.uOpacity.value,
-      mode === "xray" ? 0.34 : mode === "vessels" ? 0.16 : 0.92,
+      mode === "xray" ? 0.34 : 0.92,
       4,
       dt,
     );
@@ -163,18 +161,6 @@ export function HeartModel({ severity, lesion, bpm, stateKey, mode, onBeat }: Pr
     lastBeat.current = t;
     invalidate();
   });
-
-  const vesselMat = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#2f4fd6"),
-        roughness: 0.35,
-        metalness: 0.1,
-        transparent: true,
-        opacity: 0.95,
-      }),
-    [],
-  );
 
   return (
     <group ref={group} rotation={[0.12, -0.35, 0.06]} position={[0, -0.25, 0]}>
@@ -197,14 +183,11 @@ export function HeartModel({ severity, lesion, bpm, stateKey, mode, onBeat }: Pr
             roughness={0.3}
             metalness={0.15}
             transparent
-            opacity={mode === "vessels" ? 1 : 0.9}
+            opacity={0.9}
           />
         </mesh>
       ))}
 
-      {coronaries.map((g, i) => (
-        <mesh key={`cor-${i}`} geometry={g} material={vesselMat} />
-      ))}
     </group>
   );
 }

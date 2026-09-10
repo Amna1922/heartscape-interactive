@@ -73,9 +73,11 @@ export function ProcessingStage({ onDone }: { onDone: () => void }) {
                 >
                   {s.label}
                 </span>
-                <span className="block font-mono text-[11px] text-muted-foreground">
-                  {s.detail}
-                </span>
+                {s.detail && (
+                  <span className="block font-mono text-[11px] text-muted-foreground">
+                    {s.detail}
+                  </span>
+                )}
               </span>
             </li>
           );

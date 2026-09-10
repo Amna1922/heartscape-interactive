@@ -1,52 +1,39 @@
 import { useRef, useState } from "react";
-import { Activity, FileSpreadsheet, ScanLine, Upload, Waves, X, Check } from "lucide-react";
+import { Activity, FileSpreadsheet, ScanLine, Upload, X, Check } from "lucide-react";
 
 interface FileItem {
   name: string;
-  size: string;
-  kind: "ct" | "echo" | "csv";
+  kind: "mri" | "labs";
 }
 
-const SAMPLES: Record<FileItem["kind"], FileItem[]> = {
-  ct: [{ name: "cardiac_ct_angio_412slices.dcm.zip", size: "184.2 MB", kind: "ct" }],
-  echo: [{ name: "tte_apical4ch_strain.dcm", size: "42.8 MB", kind: "echo" }],
-  csv: [{ name: "labs_timeline_2024-2026.csv", size: "37 KB", kind: "csv" }],
+const SAMPLES: Record<FileItem["kind"], FileItem> = {
+  mri: { name: "cardiac_mri_scan.dcm", kind: "mri" },
+  labs: { name: "lab_values.csv", kind: "labs" },
 };
 
 const SLOTS = [
   {
-    kind: "ct" as const,
+    kind: "mri" as const,
     icon: ScanLine,
-    title: "Cardiac CT series",
-    hint: "DICOM · contrast-enhanced · ≤ 1 mm slices",
+    title: "Cardiac MRI",
   },
   {
-    kind: "echo" as const,
-    icon: Waves,
-    title: "Echocardiography",
-    hint: "DICOM cine loops · apical + parasternal",
-  },
-  {
-    kind: "csv" as const,
+    kind: "labs" as const,
     icon: FileSpreadsheet,
-    title: "Longitudinal labs",
-    hint: "CSV · biomarker timeline with dates",
+    title: "Lab Values",
   },
 ];
 
 export function UploadStage({ onStart }: { onStart: (files: FileItem[]) => void }) {
-  const [files, setFiles] = useState<Record<string, FileItem | null>>({
-    ct: null,
-    echo: null,
-    csv: null,
+  const [files, setFiles] = useState<Record<FileItem["kind"], FileItem | null>>({
+    mri: null,
+    labs: null,
   });
   const [dragOver, setDragOver] = useState<string | null>(null);
   const inputs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const attach = (kind: FileItem["kind"], name?: string, size?: number) => {
-    const item: FileItem = name
-      ? { name, size: size ? `${(size / 1048576).toFixed(1)} MB` : "—", kind }
-      : SAMPLES[kind][0]!;
+  const attach = (kind: FileItem["kind"], name?: string) => {
+    const item: FileItem = name ? { name, kind } : SAMPLES[kind];
     setFiles((f) => ({ ...f, [kind]: item }));
   };
 
@@ -65,15 +52,12 @@ export function UploadStage({ onStart }: { onStart: (files: FileItem[]) => void 
           Build a patient-specific heart twin
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          Attach imaging and a longitudinal biomarker file. The pipeline segments the
-          myocardium, extracts the coronary tree and solves an electro-mechanical model to
-          produce an interactive twin with perfusion mapping. Demonstration build — all
-          data is simulated.
+          The CardioTwin provides a powerful platform for medical device simulation - allowing doctors/surgeons to diagnose, model cardiac defects and diseased states, explore treatment options.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {SLOTS.map(({ kind, icon: Icon, title, hint }) => {
+      <div className="grid gap-4 md:grid-cols-2">
+        {SLOTS.map(({ kind, icon: Icon, title }) => {
           const file = files[kind];
           return (
             <div
@@ -87,7 +71,7 @@ export function UploadStage({ onStart }: { onStart: (files: FileItem[]) => void 
                 e.preventDefault();
                 setDragOver(null);
                 const f = e.dataTransfer.files?.[0];
-                attach(kind, f?.name, f?.size);
+                attach(kind, f?.name);
               }}
               className={`group relative flex flex-col rounded-xl border p-5 shadow-sm transition-colors ${
                 file
@@ -105,7 +89,7 @@ export function UploadStage({ onStart }: { onStart: (files: FileItem[]) => void 
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) attach(kind, f.name, f.size);
+                  if (f) attach(kind, f.name);
                 }}
               />
               <div className="flex items-start justify-between">
@@ -121,16 +105,10 @@ export function UploadStage({ onStart }: { onStart: (files: FileItem[]) => void 
                 )}
               </div>
               <h3 className="mt-4 text-sm font-medium text-foreground">{title}</h3>
-              <p className="mt-1 font-mono text-[11px] leading-relaxed text-muted-foreground">
-                {hint}
-              </p>
 
               {file ? (
                 <div className="mt-4 rounded-lg border border-border bg-background/60 px-3 py-2">
                   <p className="truncate font-mono text-[11px] text-foreground">{file.name}</p>
-                  <p className="font-mono text-[10px] text-muted-foreground">
-                    {file.size} · verified
-                  </p>
                 </div>
               ) : (
                 <div className="mt-4 flex gap-2">

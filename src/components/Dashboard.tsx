@@ -1,28 +1,23 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import {
-  Activity,
   AlertTriangle,
   ArrowUpRight,
   Download,
   HeartPulse,
   RotateCcw,
   ShieldCheck,
-  Stethoscope,
 } from "lucide-react";
 import {
   Area,
   ComposedChart,
-  Bar,
-  BarChart,
   CartesianGrid,
-  Cell,
   Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { RISK_TREND, TWIN_STATES, formatLab, labStatus } from "@/lib/twin-data";
+import { RISK_TREND, TWIN_STATES } from "@/lib/twin-data";
 
 const HeartViewer = lazy(() =>
   import("./heart/HeartViewer").then((m) => ({ default: m.HeartViewer })),
@@ -33,26 +28,6 @@ const TONE: Record<string, { color: string; label: string }> = {
   warning: { color: "var(--warn)", label: "Watch" },
   critical: { color: "var(--crit)", label: "Critical" },
 };
-
-function Waveform({ data, color }: { data: number[]; color: string }) {
-  const pts = useMemo(() => {
-    const max = Math.max(...data.map(Math.abs)) || 1;
-    return data
-      .map((v, i) => `${(i / (data.length - 1)) * 100},${30 - (v / max) * 22}`)
-      .join(" ");
-  }, [data]);
-  return (
-    <svg viewBox="0 0 100 60" preserveAspectRatio="none" className="h-20 w-full">
-      <polyline
-        points={pts}
-        fill="none"
-        stroke={color}
-        strokeWidth="0.7"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  );
-}
 
 function Metric({
   label,
@@ -178,62 +153,6 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               </Suspense>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                    Simulated ECG · lead II
-                  </p>
-                  <p className="font-mono text-[11px]" style={{ color: tone.color }}>
-                    {s.hr} bpm
-                  </p>
-                </div>
-                <Waveform data={s.waveform} color={tone.color} />
-              </div>
-
-              <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Segmental perfusion (%)
-                </p>
-                <div className="mt-2 h-20">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={s.perfusionSeries} margin={{ top: 4, bottom: 0 }}>
-                      <XAxis
-                        dataKey="segment"
-                        tick={{ fontSize: 9, fill: "var(--muted-foreground)" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis hide domain={[0, 100]} />
-                      <Tooltip
-                        cursor={{ fill: "transparent" }}
-                        contentStyle={{
-                          background: "var(--card)",
-                          border: "1px solid var(--border)",
-                          borderRadius: 8,
-                          fontSize: 11,
-                        }}
-                      />
-                      <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-                        {s.perfusionSeries.map((p) => (
-                          <Cell
-                            key={p.segment}
-                            fill={
-                              p.value > 85
-                                ? "var(--ok)"
-                                : p.value > 60
-                                  ? "var(--warn)"
-                                  : "var(--crit)"
-                            }
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 Risk & ejection fraction trajectory
@@ -289,6 +208,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
 
           {/* right: clinical panel */}
           <section className="flex flex-col gap-5">
+            <h2 className="text-lg font-semibold text-primary">Dummy Lab Values</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <Metric label="Ejection fraction" value={s.ef} unit="%" tone={tone.color} sub="normal ≥ 55%" />
               <Metric label="Heart rate" value={s.hr} unit="bpm" sub="60–100" />
@@ -302,7 +222,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                    Composite event risk · 12 months
+                    MACE risk prediction · 12 months
                   </p>
                   <p className="mt-2 font-mono text-4xl leading-none" style={{ color: tone.color }}>
                     {s.riskScore}
@@ -327,41 +247,13 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card shadow-sm">
-              <div className="flex items-center justify-between border-b border-border px-5 py-3">
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Laboratory panel
-                </p>
-                <p className="font-mono text-[10px] text-muted-foreground">{s.dateLabel}</p>
-              </div>
-              <ul className="divide-y divide-border">
-                {s.labs.map((l) => {
-                  const st = labStatus(l);
-                  const c = st === "normal" ? "var(--ok)" : st === "high" ? "var(--crit)" : "var(--warn)";
-                  return (
-                    <li key={l.label} className="flex items-center gap-3 px-5 py-2.5">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: c }} />
-                      <span className="min-w-0 flex-1 truncate text-sm text-foreground">{l.label}</span>
-                      <span className="font-mono text-sm" style={{ color: st === "normal" ? undefined : c }}>
-                        {formatLab(l)}
-                        <span className="ml-1 text-[10px] text-muted-foreground">{l.unit}</span>
-                      </span>
-                      <span className="hidden w-24 text-right font-mono text-[10px] text-muted-foreground sm:block">
-                        {l.ref[0]}–{l.ref[1]}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-              <div className="flex items-center gap-2">
-                <Stethoscope className="h-4 w-4" style={{ color: tone.color }} />
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Clinical summary · {s.timepoint}
-                </p>
-              </div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
+                Recommended / Checked by Cardiologist
+              </p>
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Clinical summary · {s.timepoint}
+              </p>
               <h3 className="mt-3 text-base font-medium text-foreground">{s.headline}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.summary}</p>
 
