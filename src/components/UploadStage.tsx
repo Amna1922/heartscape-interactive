@@ -73,7 +73,7 @@ export function UploadStage({ onStart }: { onStart: (files: FileItem[]) => void 
                 const f = e.dataTransfer.files?.[0];
                 attach(kind, f?.name);
               }}
-              className={`group relative flex flex-col rounded-xl border p-5 shadow-sm transition-colors ${
+              className={`group relative flex flex-col rounded-2xl border p-6 shadow-[0_10px_25px_rgba(31,58,79,0.06)] transition-colors ${
                 file
                   ? "border-primary/60 bg-primary/5"
                   : dragOver === kind
@@ -141,7 +141,7 @@ export function UploadStage({ onStart }: { onStart: (files: FileItem[]) => void 
         <button
           disabled={!ready}
           onClick={() => onStart(Object.values(files).filter(Boolean) as FileItem[])}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_5px_12px_rgba(15,118,110,0.18)] transition-opacity hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-35"
         >
           Generate digital twin
         </button>

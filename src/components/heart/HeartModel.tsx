@@ -76,6 +76,13 @@ void main(){
   atriaMask /= sumMasks;
 
   vec3 base = stateColor(uState, lvMask, rvMask, atriaMask);
+  // Fine surface variation and anatomical grooves keep the shell from reading
+  // as a perfectly smooth decorative blob.
+  float striation = 0.018 * sin(vPos.y * 28.0 + vPos.x * 9.0 + vPos.z * 13.0);
+  float avGroove = exp(-pow((vPos.y - 0.42) / 0.055, 2.0));
+  float septalGroove = exp(-pow((vPos.x + 0.04) / 0.075, 2.0)) * (1.0 - atriaMask);
+  base *= 0.96 + striation;
+  base *= 1.0 - 0.25 * max(avGroove, septalGroove);
   vec3 l1 = normalize(vec3(0.6, 0.8, 0.9));
   vec3 l2 = normalize(vec3(-0.7, 0.2, -0.5));
   float diff = max(dot(n, l1), 0.0) * 0.75 + max(dot(n, l2), 0.0) * 0.25;

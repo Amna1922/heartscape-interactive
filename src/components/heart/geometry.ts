@@ -14,13 +14,16 @@ export function buildHeartGeometry(segU = 96, segV = 120) {
   const surface = (u: number, v: number) => {
     // u: 0 = base (top), 1 = apex (bottom)
     const phi = v * Math.PI * 2;
-    const y = 1.02 - u * 2.16;
+    const y = 1.12 - u * 2.52;
 
     // silhouette width: full at mid ventricle, pinched at apex, slightly
     // narrowed at the base plane
     const t = u;
-    let w = Math.pow(Math.sin(Math.PI * Math.pow(t, 0.52)), 0.72);
-    w *= 1 - 0.18 * Math.pow(t, 3.2);
+    let w = Math.pow(Math.sin(Math.PI * Math.pow(t, 0.5)), 0.78);
+    w *= 1 - 0.26 * Math.pow(t, 3.1);
+    // A broad left ventricle and smaller right-ventricular shoulder create
+    // the asymmetric silhouette of a heart rather than a symmetric fruit.
+    w += 0.11 * Math.exp(-Math.pow((t - 0.3) / 0.2, 2));
     w = Math.max(w, 0.02);
 
     // cross-section: dominant LV circle + smaller RV bulge on -x side
@@ -32,10 +35,16 @@ export function buildHeartGeometry(segU = 96, segV = 120) {
     // atrioventricular sulcus groove near the base
     const groove = 1 - 0.09 * Math.exp(-Math.pow((u - 0.16) / 0.06, 2)) * (1 + 0.4 * Math.cos(phi));
 
-    const r = w * lobe * groove * 0.95;
-    const x = Math.cos(phi) * r + 0.06 * Math.sin(u * Math.PI) - 0.12 * u * u;
-    const z = Math.sin(phi) * r * 0.86;
-    return new THREE.Vector3(x, y - 0.05 * Math.cos(phi) * (1 - u), z);
+    const r = w * lobe * groove * 0.88;
+    const rvShoulder = 0.13 * Math.exp(-Math.pow((phi - Math.PI) / 0.9, 2)) * Math.exp(-Math.pow((t - 0.42) / 0.35, 2));
+    const x =
+      Math.cos(phi) * r +
+      rvShoulder +
+      0.08 * Math.sin(u * Math.PI) -
+      0.17 * u * u;
+    const z = Math.sin(phi) * r * (0.82 + 0.08 * Math.cos(phi));
+    const apexPoint = 0.1 * Math.pow(t, 5) * (1 + 0.35 * Math.sin(phi));
+    return new THREE.Vector3(x, y - 0.06 * Math.cos(phi) * (1 - u) - apexPoint, z);
   };
 
   for (let i = 0; i <= segU; i++) {
@@ -51,7 +60,8 @@ export function buildHeartGeometry(segU = 96, segV = 120) {
         0.56 +
         0.2 * u +
         0.07 * Math.cos(phi + 0.5) * (0.4 + u) +
-        0.03 * Math.sin(phi * 3 + u * 6);
+        0.03 * Math.sin(phi * 3 + u * 6) +
+        0.018 * Math.sin(phi * 11 + u * 19);
       fields.push(f);
     }
   }

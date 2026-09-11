@@ -44,7 +44,7 @@ function Metric({
   sub?: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="rounded-lg border border-border/80 bg-card p-4 shadow-[0_8px_24px_rgba(31,58,79,0.06)]">
       <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </p>
@@ -140,7 +140,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
             <div className="h-[420px] sm:h-[520px]">
               <Suspense
                 fallback={
-                  <div className="flex h-full items-center justify-center rounded-xl border border-border bg-card font-mono text-[11px] uppercase tracking-wider text-muted-foreground shadow-sm">
+                  <div className="flex h-full items-center justify-center rounded-2xl border border-border/80 bg-card font-mono text-[11px] uppercase tracking-wider text-muted-foreground shadow-[0_12px_30px_rgba(31,58,79,0.07)]">
                     Loading twin geometry…
                   </div>
                 }
@@ -154,7 +154,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               </Suspense>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div className="rounded-2xl border border-border/80 border-l-4 border-l-primary bg-card p-5 shadow-[0_12px_30px_rgba(31,58,79,0.07)]">
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 Risk & ejection fraction trajectory
               </p>
@@ -219,7 +219,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               <Metric label="SpO₂" value={s.spo2} unit="%" sub="≥ 95%" />
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-[0_12px_30px_rgba(31,58,79,0.07)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -248,7 +248,7 @@ export function Dashboard({ onReset }: { onReset: () => void }) {
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+            <div className="rounded-xl border border-border/80 bg-card p-5 shadow-[0_12px_30px_rgba(31,58,79,0.06)]">
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
                 Recommended / Checked by Cardiologist
               </p>

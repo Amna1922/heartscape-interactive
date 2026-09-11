@@ -50,7 +50,7 @@ export function ProcessingStage({ onDone }: { onDone: () => void }) {
           return (
             <li
               key={s.label}
-              className={`flex items-start gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm transition-colors ${
+              className={`flex items-start gap-3 rounded-lg border bg-card px-4 py-3 shadow-[0_6px_18px_rgba(31,58,79,0.04)] transition-colors ${
                 state === "active"
                   ? "border-primary/50 bg-primary/5"
                   : "border-border"
